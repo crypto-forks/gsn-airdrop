@@ -1,14 +1,13 @@
 import React from "react";
 import { Contract } from "@ethersproject/contracts";
-import { getDefaultProvider } from "@ethersproject/providers";
-import { useQuery } from "@apollo/react-hooks";
+import {getDefaultProvider, Web3Provider} from "@ethersproject/providers";
 
 import { Body, Button, Header, Image, Link } from "./components";
-import logo from "./ethereumLogo.png";
+import logo from "./gsn-green-vector.svg";
 import useWeb3Modal from "./hooks/useWeb3Modal";
 
-import { addresses, abis } from "@project/contracts";
-import GET_TRANSFERS from "./graphql/subgraph";
+import { addresses, abis } from "@opengsn/airdrop-contracts";
+import {ClaimAirdrop} from "./components/ClaimAirdrop";
 
 async function readOnChainData() {
   // Should replace with the end-user wallet, e.g. Metamask
@@ -38,35 +37,20 @@ function WalletButton({ provider, loadWeb3Modal, logoutOfWeb3Modal }) {
 }
 
 function App() {
-  const { loading, error, data } = useQuery(GET_TRANSFERS);
-  const [provider, loadWeb3Modal, logoutOfWeb3Modal] = useWeb3Modal();
-
-  React.useEffect(() => {
-    if (!loading && !error && data && data.transfers) {
-      console.log({ transfers: data.transfers });
-    }
-  }, [loading, error, data]);
+  // const [provider, loadWeb3Modal, logoutOfWeb3Modal] = useWeb3Modal();
 
   return (
     <div>
       <Header>
-        <WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal} logoutOfWeb3Modal={logoutOfWeb3Modal} />
+        {/*<WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal} logoutOfWeb3Modal={logoutOfWeb3Modal} />*/}
       </Header>
-      <Body>
+        <Body>
         <Image src={logo} alt="react-logo" />
-        <p>
-          Edit <code>packages/react-app/src/App.js</code> and save to reload.
-        </p>
-        {/* Remove the "hidden" prop and open the JavaScript console in the browser to see what this function does */}
-        <Button hidden onClick={() => readOnChainData()}>
-          Read On-Chain Balance
-        </Button>
-        <Link href="https://ethereum.org/developers/#getting-started" style={{ marginTop: "8px" }}>
-          Learn Ethereum
+          <ClaimAirdrop provider = {new Web3Provider(window.ethereum)}/>
+        <Link href="https://opengsn.org" style={{ marginTop: "8px" }}>
+          The OpenGSN site
         </Link>
-        <Link href="https://reactjs.org">Learn React</Link>
-        <Link href="https://thegraph.com/docs/quick-start">Learn The Graph</Link>
-      </Body>
+        </Body>
     </div>
   );
 }

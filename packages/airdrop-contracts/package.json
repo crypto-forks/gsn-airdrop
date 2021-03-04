@@ -1,0 +1,5 @@
+{
+  "name": "@opengsn/airdrop-contracts",
+  "version": "1.0.1",
+  "main": "./src/index.js"
+}

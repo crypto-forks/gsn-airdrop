@@ -1,5 +1,5 @@
 {
-  "name": "@project/react-app",
+  "name": "@opengsn/airdrop-app",
   "version": "1.0.0",
   "homepage": "./",
   "browserslist": {
@@ -14,8 +14,13 @@
       "last 1 safari version"
     ]
   },
+  "devDependencies": {
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.3"
+  },
   "dependencies": {
-    "@project/contracts": "^1.0.0",
+    "@opengsn/airdrop-contracts": "^1.0.1",
+    "@opengsn/distributor": "^1.0.1",
     "@apollo/react-hooks": "^3.1.5",
     "@ethersproject/contracts": "^5.0.5",
     "@ethersproject/providers": "^5.0.12",
