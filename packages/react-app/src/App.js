@@ -81,8 +81,7 @@ function App() {
       </Header>
         <Body>
         <Image src={logo} alt="react-logo" />
-          <ClaimAirdrop provider = {provider} title={(provider||"asd").toString()}/>
-        <Link href="https://opengsn.org" style={{ marginTop: "8px" }}>
+          <ClaimAirdrop provider = {provider}/>        <Link href="https://opengsn.org" style={{ marginTop: "8px" }}>
           The OpenGSN site
         </Link>
         </Body>
