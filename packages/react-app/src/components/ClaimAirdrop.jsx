@@ -2,69 +2,99 @@ import {Button} from "./index";
 
 import {initClaimer, initToken} from '@opengsn/distributor'
 
-import React,{Component} from "react";
+import React, {Component} from "react";
 import {Web3Provider} from "@ethersproject/providers";
 
-const toString = x=>(x||'null').toString()
+const toString = x => (x || 'null').toString()
 
 export class ClaimAirdrop extends Component {
 
-    provider
-    state
-    constructor(props) {
-        super(props);
-        // const {provider} = props
-        const provider = new Web3Provider(window.ethereum)
-        this.provider = provider
-        this.state={}
+  provider
+  state
+
+  constructor(props) {
+    super(props);
+    const {provider} = props
+    this.provider = provider
+    this.state = {}
+  }
+
+  async componentDidMount() {
+    const provider = this.provider
+    if (!provider) {
+      this.setState({error: "no provider"})
+      return
     }
-    async componentDidMount() {
+    try {
 
-        const provider = this.provider
-        this.account = (await provider.listAccounts())[0];
-        console.log('netinfo=', await provider.getNetwork())
+      this.account = (await provider.listAccounts())[0];
 
-        this.token = await initToken(provider)
-        this.claimer = await initClaimer(this.account, provider)
+      this.token = await initToken(provider)
+      this.claimer = await initClaimer(this.account, provider)
 
-        await this.updateDisplay()
+      await this.updateDisplay()
+    } catch (e) {
+      console.log(e)
+      this.setState({error: e.message})
     }
+  }
 
-    async updateDisplay() {
-        const account = this.account
-        const alreadyClaimed = await this.claimer.alreadyClaimed()
-        const amount = alreadyClaimed ? "claimed" : this.claimer.getAmount()
-        const balance = await this.token.balanceOf(account).then(toString)
-        const ethBalance = await this.provider.getBalance(account).then(toString)
-        console.log({account, balance, alreadyClaimed})
-        this.setState({
-            account,
-            amount,
-            balance,
-            ethBalance,
-            alreadyClaimed
-        })
+  async updateDisplay() {
+    const account = this.account
+    if (!account)
+      return
+    const state = await this.claimer.getState()
+    const amount = this.claimer.getAmount()
+    const balance = await this.token.balanceOf(account).then(toString)
+    const ethBalance = await this.provider.getBalance(account).then(toString)
+    this.setState({
+      account,
+      amount,
+      balance,
+      ethBalance,
+      state
+    })
+  }
+
+  async claim() {
+    try {
+      this.setState({state: 'claiming'})
+      await this.claimer.doClaim()
+      this.justClaimed = true
+    } finally {
+      await this.updateDisplay()
     }
+  }
 
-    async claim() {
-        this.claimer.doClaim()
-        this.updateDisplay()
+  getStateName() {
+    switch (this.state.state) {
+      case "ok": return `Claim your ${this.state.amount} tokens`
+      case "claiming": return `Claiming your ${this.state.amount} tokens`
+      case 'claimed': {
+        if ( this.justClaimed )
+          return "Claimed successfully"
+        return 'Already claimed'
+      }
+      case 'no-claim': return 'No tokens for your account'
+      default:
+        return `errr: state ${this.state.state}`
     }
+  }
+  render() {
+    return (
+      <div>
+        {this.state.error && <div style={{color: "red"}}>{this.state.error}</div>}
+        <p>Claim your GSN Tokens</p>
+        Your account: {this.state.account}<br/>
+        Eth balance: {this.state.ethBalance}<br/>
+        Token balance: {this.state.balance}<br/>
+        Claim Amount: {this.state.amount}<br/>
+        {/* Remove the "hidden" prop and open the JavaScript console in the browser to see what this function does */}
+        <Button disabled={this.state.state !== 'ok'} onClick={() => this.claim()}>
+          {this.getStateName()}
+        </Button>
 
-    render() {
-        return (
-            <div>
-                <p>Claim your GSN Tokens</p>
-                <p>Your account: {this.state.account}</p>
-                <p>Eth balance: {this.state.ethBalance}</p>
-                <p>Token balance: {this.state.balance}</p>
-                <p>Claim Amount: {this.state.amount}</p>
-                {/* Remove the "hidden" prop and open the JavaScript console in the browser to see what this function does */}
-                <Button enabled="true" onClick={()=>this.claim()}>
-                    Claim your Tokens
-                </Button>
-
-            </div>
-        );
-    }
+      </div>
+    );
+  }
 }

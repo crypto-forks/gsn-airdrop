@@ -8,7 +8,7 @@ async function initContract(provider, truffleInstance) {
     const net = await provider.getNetwork()
     const chainId = net.chainId
     let contractNetInfo = truffleInstance.networks[chainId]
-    if ( contractNetInfo==null && chainId == 1337 ) {
+    if ( contractNetInfo == null && chainId == 1337 ) {
       //damn ethers. doesn't return the networkid, whcih is random with ganache.
       const id = Object.keys(truffleInstance.networks)[0]
       contractNetInfo = truffleInstance.networks[id]
@@ -31,6 +31,13 @@ export class Claimer {
     this.claim = proofs.claims[addr]
   }
 
+  async getState() {
+    if ( !this.hasProof() ) return "no-claim"
+    if ( await this.alreadyClaimed() )
+      return "claimed"
+    return "ok"
+  }
+
   hasProof() {
     return this.claim!=null
   }
@@ -48,8 +55,10 @@ export class Claimer {
   async doClaim() {
     const { index, amount, proof } = this.claim
     const res = await this.theContract.connect(this.theContract.provider.getSigner()).claim(index, this.address, amount, proof)
+    await new Promise(resolve=>setTimeout(resolve,1000))
     console.log(res)
     const res1 = await res.wait()
+    await new Promise(resolve=>setTimeout(resolve,1000))
     console.log(res1)
   }
 }
