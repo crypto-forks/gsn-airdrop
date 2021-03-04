@@ -3,7 +3,6 @@ import {Button} from "./index";
 import {initClaimer, initToken} from '@opengsn/distributor'
 
 import React, {Component} from "react";
-import {Web3Provider} from "@ethersproject/providers";
 
 const toString = x => (x || 'null').toString()
 
