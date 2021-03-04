@@ -1,6 +1,7 @@
 {
   "name": "@opengsn/distributor",
   "version": "1.0.1",
+  "license": "MIT",
   "keywords": [
     "airdrop",
     "gsn",
