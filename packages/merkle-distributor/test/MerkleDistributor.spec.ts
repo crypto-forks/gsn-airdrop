@@ -14,6 +14,10 @@ const overrides = {
 }
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
+const ZERO_ADDR = '0x0000000000000000000000000000000000000000'
+const MAX_UINT = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+
+const gasOffset = 75
 
 describe('MerkleDistributor', () => {
   const provider = new MockProvider({
@@ -34,28 +38,28 @@ describe('MerkleDistributor', () => {
 
   describe('#token', () => {
     it('returns the token address', async () => {
-      const distributor = await deployContract(wallet0, Distributor, [token.address, ZERO_BYTES32], overrides)
+      const distributor = await deployContract(wallet0, Distributor, [token.address, ZERO_BYTES32, MAX_UINT, ZERO_ADDR], overrides)
       expect(await distributor.token()).to.eq(token.address)
     })
   })
 
   describe('#merkleRoot', () => {
     it('returns the zero merkle root', async () => {
-      const distributor = await deployContract(wallet0, Distributor, [token.address, ZERO_BYTES32], overrides)
+      const distributor = await deployContract(wallet0, Distributor, [token.address, ZERO_BYTES32, MAX_UINT, ZERO_ADDR], overrides)
       expect(await distributor.merkleRoot()).to.eq(ZERO_BYTES32)
     })
   })
 
   describe('#claim', () => {
     it('fails for empty proof', async () => {
-      const distributor = await deployContract(wallet0, Distributor, [token.address, ZERO_BYTES32], overrides)
+      const distributor = await deployContract(wallet0, Distributor, [token.address, ZERO_BYTES32, MAX_UINT, ZERO_ADDR], overrides)
       await expect(distributor.claim(0, wallet0.address, 10, [])).to.be.revertedWith(
         'MerkleDistributor: Invalid proof.'
       )
     })
 
     it('fails for invalid index', async () => {
-      const distributor = await deployContract(wallet0, Distributor, [token.address, ZERO_BYTES32], overrides)
+      const distributor = await deployContract(wallet0, Distributor, [token.address, ZERO_BYTES32, MAX_UINT, ZERO_ADDR], overrides)
       await expect(distributor.claim(0, wallet0.address, 10, [])).to.be.revertedWith(
         'MerkleDistributor: Invalid proof.'
       )
@@ -69,7 +73,7 @@ describe('MerkleDistributor', () => {
           { account: wallet0.address, amount: BigNumber.from(100) },
           { account: wallet1.address, amount: BigNumber.from(101) },
         ])
-        distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
+        distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot(), MAX_UINT, ZERO_ADDR], overrides)
         await token.setBalance(distributor.address, 201)
       })
 
@@ -176,7 +180,7 @@ describe('MerkleDistributor', () => {
         const proof = tree.getProof(0, wallet0.address, BigNumber.from(100))
         const tx = await distributor.claim(0, wallet0.address, 100, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(78466)
+        expect(receipt.gasUsed - gasOffset).to.eq(78466)
       })
     })
     describe('larger tree', () => {
@@ -188,7 +192,7 @@ describe('MerkleDistributor', () => {
             return { account: wallet.address, amount: BigNumber.from(ix + 1) }
           })
         )
-        distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
+        distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot(), MAX_UINT, ZERO_ADDR], overrides)
         await token.setBalance(distributor.address, 201)
       })
 
@@ -210,7 +214,7 @@ describe('MerkleDistributor', () => {
         const proof = tree.getProof(9, wallets[9].address, BigNumber.from(10))
         const tx = await distributor.claim(9, wallets[9].address, 10, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(80960)
+        expect(receipt.gasUsed - gasOffset).to.eq(80960)
       })
 
       it('gas second down about 15k', async () => {
@@ -229,7 +233,7 @@ describe('MerkleDistributor', () => {
           overrides
         )
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(65940)
+        expect(receipt.gasUsed - gasOffset).to.eq(65940)
       })
     })
 
@@ -257,7 +261,7 @@ describe('MerkleDistributor', () => {
       })
 
       beforeEach('deploy', async () => {
-        distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot()], overrides)
+        distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot(), MAX_UINT, ZERO_ADDR], overrides)
         await token.setBalance(distributor.address, constants.MaxUint256)
       })
 
@@ -265,13 +269,13 @@ describe('MerkleDistributor', () => {
         const proof = tree.getProof(50000, wallet0.address, BigNumber.from(100))
         const tx = await distributor.claim(50000, wallet0.address, 100, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(91650)
+        expect(receipt.gasUsed - gasOffset).to.eq(91650)
       })
       it('gas deeper node', async () => {
         const proof = tree.getProof(90000, wallet0.address, BigNumber.from(100))
         const tx = await distributor.claim(90000, wallet0.address, 100, proof, overrides)
         const receipt = await tx.wait()
-        expect(receipt.gasUsed).to.eq(91586)
+        expect(receipt.gasUsed - gasOffset).to.eq(91586)
       })
       it('gas average random distribution', async () => {
         let total: BigNumber = BigNumber.from(0)
@@ -284,7 +288,7 @@ describe('MerkleDistributor', () => {
           count++
         }
         const average = total.div(count)
-        expect(average).to.eq(77075)
+        expect(average.sub(gasOffset)).to.eq(77075)
       })
       // this is what we gas golfed by packing the bitmap
       it('gas average first 25', async () => {
@@ -298,7 +302,7 @@ describe('MerkleDistributor', () => {
           count++
         }
         const average = total.div(count)
-        expect(average).to.eq(62824)
+        expect(average.sub(gasOffset)).to.eq(62824)
       })
 
       it('no double claims in random distribution', async () => {
@@ -313,6 +317,68 @@ describe('MerkleDistributor', () => {
     })
   })
 
+  describe('expiration', () => {
+    it( 'can\'t create an expired distribution', async () => {
+      await expect(deployContract(wallet0, Distributor, [token.address, ZERO_BYTES32,1, ZERO_ADDR], overrides))
+          .to.be.revertedWith('expiration block already passed')
+    })
+
+    it('should stop serve requests after expiration', async () => {
+        const tree = new BalanceTree([
+          { account: wallet0.address, amount: BigNumber.from(100) },
+          { account: wallet1.address, amount: BigNumber.from(101) },
+        ])
+        const curBlock = await provider.getBlockNumber()
+        const distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot(), curBlock+3, ZERO_ADDR], overrides)
+        await token.setBalance(distributor.address, 201)
+        expect(await distributor.isExpired()).to.eq(false)
+        const proof = tree.getProof(0, wallet0.address, BigNumber.from(100))
+        await distributor.claim(0, wallet0.address, 100, proof, overrides)
+        await expect(distributor.claim(1, wallet1.address, 100, proof, overrides))
+            .to.be.revertedWith('MerkleDistributor: already expired.')
+        expect(await distributor.isExpired()).to.eq(true)
+    });
+
+    it('should allow to redeem funds only after expiration', async () => {
+      const tree = new BalanceTree([
+        { account: wallet0.address, amount: BigNumber.from(100) },
+        { account: wallet1.address, amount: BigNumber.from(101) },
+      ])
+      const curBlock = await provider.getBlockNumber()
+      const redeedAddress = '0x'.padEnd(42,'1')
+      const distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot(), curBlock+3, redeedAddress], overrides)
+      await token.setBalance(distributor.address, 201)
+      await expect(distributor.redeemExpiredTokens())
+          .to.be.revertedWith('MerkleDistributor: can\'t redeem: not expired.')
+      //any transaction, just to mine one more block
+      await token.setBalance(distributor.address, 202)
+      await distributor.redeemExpiredTokens()
+      expect(await token.balanceOf(distributor.address)).to.eq(0)
+      expect(await token.balanceOf(redeedAddress)).to.eq(202)
+    });
+
+    it('should allow to redeem funds only after expiration', async () => {
+      const tree = new BalanceTree([
+        { account: wallet0.address, amount: BigNumber.from(100) },
+        { account: wallet1.address, amount: BigNumber.from(101) },
+      ])
+      const curBlock = await provider.getBlockNumber()
+      const redeedAddress = '0x'.padEnd(42,'1')
+      const distributor = await deployContract(wallet0, Distributor, [token.address, tree.getHexRoot(), curBlock+3, redeedAddress], overrides)
+      await token.setBalance(distributor.address, 201)
+      await expect(distributor.redeemExpiredTokens())
+          .to.be.revertedWith('MerkleDistributor: can\'t redeem: not expired.')
+      //any transaction, just to mine one more block
+      await token.setBalance(distributor.address, 202)
+      await expect(distributor.redeemExpiredTokens())
+          .to.emit(distributor, 'RedeemExpiredTokens')
+          .withArgs(redeedAddress, 202)
+      expect(await token.balanceOf(distributor.address)).to.eq(0)
+      expect(await token.balanceOf(redeedAddress)).to.eq(202)
+      await expect(distributor.redeemExpiredTokens())
+          .to.be.revertedWith('MerkleDistributor: nothing to redeem.')
+    });
+  })
   describe('parseBalanceMap', () => {
     let distributor: Contract
     let claims: {
@@ -330,7 +396,7 @@ describe('MerkleDistributor', () => {
       })
       expect(tokenTotal).to.eq('0x02ee') // 750
       claims = innerClaims
-      distributor = await deployContract(wallet0, Distributor, [token.address, merkleRoot], overrides)
+      distributor = await deployContract(wallet0, Distributor, [token.address, merkleRoot, MAX_UINT, ZERO_ADDR], overrides)
       await token.setBalance(distributor.address, tokenTotal)
     })
 

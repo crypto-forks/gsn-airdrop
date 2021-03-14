@@ -20,7 +20,6 @@
     "typescript": "^3.7.3"
   },
   "dependencies": {
-    "@opengsn/airdrop-contracts": "^1.0.1",
     "@opengsn/distributor": "^1.0.1",
     "@ethersproject/contracts": "^5.0.5",
     "@ethersproject/providers": "^5.0.12",

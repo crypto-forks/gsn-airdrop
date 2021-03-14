@@ -12,6 +12,16 @@ interface IMerkleDistributor {
     // Claim the given amount of the token to the given address. Reverts if the inputs are invalid.
     function claim(uint256 index, address account, uint256 amount, bytes32[] calldata merkleProof) external;
 
+    // After expiration, redeem all remaining tokens to redeed address
+    function redeemExpiredTokens() external;
+    // Check if already expired
+    function isExpired() external view returns (bool);
+    // Returns configured expiration block
+    function expirationBlock() external view returns (uint);
+    // Returns redeem address
+    function expirationRedeemAddress() external view returns (address);
+
+    event RedeemExpiredTokens(address expirationRedeemAddress, uint amount);
     // This event is triggered whenever a call to #claim succeeds.
     event Claimed(uint256 index, address account, uint256 amount);
 }
