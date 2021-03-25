@@ -4,21 +4,14 @@ const MerkleDistributor = require("../build/contracts/MerkleDistributor.json")
 const ERC20 = require("../build/contracts/TestERC20.json")
 const proofs = require("../proofs/proofs")
 
-async function initContract(provider, truffleInstance) {
-  const net = await provider.getNetwork()
-  const networkId = await provider.send('net_version')
-  const contractNetInfo = truffleInstance.networks[networkId]
-  if (contractNetInfo == null) {
-    throw new Error(`no instance of ${truffleInstance.contractName} for network ${chainId}. only for: ${Object.keys(truffleInstance.networks)}`)
-  }
-  return new Contract(contractNetInfo.address, truffleInstance.abi, provider)
+async function initContract(provider, truffleInstance, address) {
+  return new Contract(address, truffleInstance.abi, provider)
 }
 
 /**
  * Client wrapper for making a claim
  */
 export class Claimer {
-
 
   constructor(addr, provider, contract) {
     this.address = addr
@@ -33,6 +26,9 @@ export class Claimer {
     return "ok"
   }
 
+  async getToken() {
+    return await this.theContract.token()
+  }
   hasProof() {
     return this.claim!=null
   }
@@ -58,10 +54,16 @@ export class Claimer {
   }
 }
 
-export async function initClaimer(addr, provider) {
-  return new Claimer(addr, provider, await initContract(provider, MerkleDistributor))
+export async function initClaimer(claimerAddress, provider) {
+  const networkId = await provider.send('net_version')
+  const contractNetInfo = MerkleDistributor.networks[networkId]
+  if (contractNetInfo == null) {
+    throw new Error(`no instance of ${MerkleDistributor.contractName} for network ${networkId}. only for: ${Object.keys(MerkleDistributor.networks)}`)
+  }
+
+  return new Claimer(claimerAddress, provider, await initContract(provider, MerkleDistributor, contractNetInfo.address))
 }
 
-export async function initToken(provider) {
-  return await initContract(provider, ERC20)
+export async function initToken(provider, address) {
+  return await initContract(provider, ERC20, address)
 }

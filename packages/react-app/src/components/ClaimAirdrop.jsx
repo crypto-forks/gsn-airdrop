@@ -28,8 +28,8 @@ export class ClaimAirdrop extends Component {
 
       this.account = (await provider.listAccounts())[0];
 
-      this.token = await initToken(provider)
       this.claimer = await initClaimer(this.account, provider)
+      this.token = await initToken(provider, await this.claimer.getToken())
 
       await this.updateDisplay()
     } catch (e) {
