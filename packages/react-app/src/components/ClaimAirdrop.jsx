@@ -84,10 +84,12 @@ export class ClaimAirdrop extends Component {
       <div>
         {this.state.error && <div style={{color: "red"}}>{this.state.error}</div>}
         <p>Claim your GSN Tokens</p>
-        Your account: {this.state.account}<br/>
-        Eth balance: {this.state.ethBalance}<br/>
-        Token balance: {this.state.balance}<br/>
-        Claim Amount: {this.state.amount}<br/>
+        {
+          // Your account: {this.state.account}<br/>
+          // Eth balance: {this.state.ethBalance}<br/>
+          // Token balance: {this.state.balance}<br/>
+          // Claim Amount: {this.state.amount}<br/>
+        }
         {/* Remove the "hidden" prop and open the JavaScript console in the browser to see what this function does */}
         <Button disabled={this.state.state !== 'ok'} onClick={() => this.claim()}>
           {this.getStateName()}

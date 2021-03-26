@@ -1,5 +1,15 @@
+var HDWalletProvider = require('truffle-hdwallet-provider')
+var mnemonic = 'digital unknown jealous mother legal hedgehog save glory december universe spread figure custom found six'
+
 module.exports = {
   networks: {
+    rinkeby: {
+      provider: function () {
+        return new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/f40be2b1a3914db682491dc62a19ad43')
+      },
+      skipDryRun: true,
+      network_id: 4
+    },
     development: {
       host: "127.0.0.1",     // Localhost (default: none)
       port: 8545,            // Standard Ethereum port (default: none)
@@ -20,3 +30,4 @@ module.exports = {
     }
   }
 }
+
