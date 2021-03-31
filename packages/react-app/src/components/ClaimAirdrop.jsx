@@ -67,8 +67,8 @@ export class ClaimAirdrop extends Component {
 
   getStateName() {
     switch (this.state.state) {
-      case "ok": return `Claim your ${this.state.amount} tokens`
-      case "claiming": return `Claiming your ${this.state.amount} tokens`
+      case "ok": return `Claim your ${this.state.amount/1e18} tokens`
+      case "claiming": return `Claiming your ${this.state.amount/1e18} tokens`
       case 'claimed': {
         if ( this.justClaimed )
           return "Claimed successfully"

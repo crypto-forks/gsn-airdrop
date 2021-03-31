@@ -32,7 +32,7 @@
     "pretest": "yarn compile",
     "test": "mocha",
 
-    "deploy": "rm -rf build && yarn gen-proofs && truffle migrate --reset --compile-all",
+    "deploy": "rm -rf build && yarn gen-proofs && truffle migrate --reset --compile-all --network $NETWORK",
     "gen-proofs": "mkdir -p proofs; ts-node scripts/generate-merkle-root.ts --input input.json |jq > proofs/proofs.json",
     "prepublishOnly": "yarn test"
   }
