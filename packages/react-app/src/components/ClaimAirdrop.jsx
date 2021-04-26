@@ -21,12 +21,20 @@ export class ClaimAirdrop extends Component {
   async componentDidMount() {
     const provider = this.provider
     if (!provider) {
-      this.setState({error: "no provider"})
+      this.setState({error: "Metamask provider not detected"})
       return
     }
     try {
 
+      if ( !provider ) {
+        this.setState({error: 'Metamask not detected'})
+        return
+      }
       this.account = (await provider.listAccounts())[0];
+      if ( !this.account ) {
+        this.setState({ error: 'Metamask account not connected'})
+        return
+      }
 
       this.claimer = await initClaimer(this.account, provider)
       this.token = await initToken(provider, await this.claimer.getToken())
@@ -76,7 +84,7 @@ export class ClaimAirdrop extends Component {
       }
       case 'no-claim': return 'No tokens for your account'
       default:
-        return `errr: state ${this.state.state}`
+        return `Unable to claim tokens`
     }
   }
   render() {
