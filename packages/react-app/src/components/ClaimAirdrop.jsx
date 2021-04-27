@@ -1,4 +1,5 @@
 import {Button} from "./index";
+import numeral from 'numeral'
 
 import {initClaimer, initToken} from '@opengsn/distributor'
 
@@ -73,10 +74,15 @@ export class ClaimAirdrop extends Component {
     }
   }
 
+  formatAmount(amount) {
+
+    return numeral(amount/1e18).format('0,0')
+  }
+
   getStateName() {
     switch (this.state.state) {
-      case "ok": return `Claim your ${this.state.amount/1e18} tokens`
-      case "claiming": return `Claiming your ${this.state.amount/1e18} tokens`
+      case "ok": return `Claim your ${this.formatAmount(this.state.amount)} tokens`
+      case "claiming": return `Claiming your ${this.formatAmount(this.state.amount)} tokens`
       case 'claimed': {
         if ( this.justClaimed )
           return "Claimed successfully"

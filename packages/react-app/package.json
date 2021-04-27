@@ -20,9 +20,9 @@
     "typescript": "^3.7.3"
   },
   "dependencies": {
-    "@opengsn/distributor": "^1.0.1",
     "@ethersproject/contracts": "^5.0.5",
     "@ethersproject/providers": "^5.0.12",
+    "@opengsn/distributor": "^1.0.1",
     "@testing-library/dom": "^6.16.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
@@ -32,6 +32,7 @@
     "chalk": "^4.1.0",
     "eslint": "^6.8.0",
     "eslint-plugin-flowtype": "^4.6.0",
+    "numeral": "^2.0.6",
     "react": "16.14.0",
     "react-dom": "16.14.0",
     "react-scripts": "3.4.3",
