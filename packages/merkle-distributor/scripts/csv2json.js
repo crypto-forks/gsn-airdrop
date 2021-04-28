@@ -4,9 +4,9 @@ const BN = require('bn.js')
 const { toWei } = require('web3-utils')
 
 async function run () {
-  const sendersAirdroppedAmount = `${(new BN(toWei('400', 'ether'))).toString(16)}`
-  const developersAirdroppedAmount = `${(new BN(toWei('30000', 'ether'))).toString(16)}`
-  const relayOperatorsAirdroppedAmount = `${(new BN(toWei('30000', 'ether'))).toString(16)}`
+  const sendersAirdroppedAmount = new BN(toWei('400', 'ether'))
+  const developersAirdroppedAmount = new BN(toWei('30000', 'ether'))
+  const relayOperatorsAirdroppedAmount = new BN(toWei('30000', 'ether'))
   const personsCheckSum = toWei('1525640', 'ether')
 
   const sendersFile = fs.readFileSync(__dirname + '/../airdrop/lists/senders', 'ascii')
@@ -47,7 +47,7 @@ async function run () {
         return
       }
       personsSum = personsSum.add(new BN(amount))
-      personsJSON[recipientAddress.toLowerCase()] = `${(new BN(amount)).toString(16)}`
+      personsJSON[recipientAddress.toLowerCase()] = new BN(amount)
     }
   })
   if (personsSum.toString() !== personsCheckSum) {
@@ -59,8 +59,19 @@ async function run () {
   // Order is important here, since there might be duplicate entries in (senders, developers, relayOperators, persons). Order is from lowest amount to highest, s.t. a duplicate will receive
   // the higher value.
   const mergedJSON = {  ...sendersJSON, ...developersJSON, ...relayOperatorsJSON, ...personsJSON }
+  const allocation = {}
+  for (const key of Object.keys(mergedJSON)) {
+    allocation[key] = new BN('0')
+    for (const json of [sendersJSON, developersJSON, relayOperatorsJSON, personsJSON]) {
+      if (json[key]) {
+        allocation[key] = allocation[key].add(new BN(json[key]))
+      }
+    }
+    // NOTE: now turn it into a monster HEX with no 0x for Buffer.from later!..
+    allocation[key] = `${allocation[key].toString(16)}`
+  }
 
-  fs.writeFileSync(__dirname + '/../build/input.json', JSON.stringify(mergedJSON, null, '\n').replace(/\n\n/g, '\n'))
+  fs.writeFileSync(__dirname + '/../build/input.json', JSON.stringify(allocation, null, '\n').replace(/\n\n/g, '\n'))
   fs.writeFileSync(__dirname + '/../build/vested-airdrop.json', JSON.stringify(personsVestedAirdrop, null, '\n').replace(/\n\n/g, '\n'))
 
 }
