@@ -12,7 +12,7 @@ async function run () {
   const sendersFile = fs.readFileSync(__dirname + '/../airdrop/lists/senders', 'ascii')
   const developersFile = fs.readFileSync(__dirname + '/../airdrop/lists/developers', 'ascii')
   const relayOperatorsFile = fs.readFileSync(__dirname + '/../airdrop/lists/relay-operators', 'ascii')
-  const jsonObjFromCsv = await csvtojson().fromFile(__dirname + '/../airdrop/airdrop-v6.csv')
+  const jsonObjFromCsv = await csvtojson().fromFile(__dirname + '/../airdrop/airdrop.csv')
 
   const sendersArray = sendersFile.trim().split('\n')
   const developersArray = developersFile.trim().split('\n')
