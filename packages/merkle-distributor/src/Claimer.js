@@ -70,8 +70,9 @@ export async function initClaimer(claimerAddress, provider, baseUrl) {
   const {data: addresses} = await axiosInstance.get('proofs/addresses.json')
 
   const { distributor } = addresses
-  if (!distributor) {
-    console.error(`no instance of ${MerkleDistributor.contractName} for network ${networkId}. only for: ${Object.keys(MerkleDistributor.networks)}`)
+  if (!distributor || await provider.getCode(distributor) == '0x') {
+    const network = await provider.getNetwork()
+    console.error(`no instance of ${MerkleDistributor.contractName} for network ${network.chainId}. only for: ${Object.keys(MerkleDistributor.networks)}`)
     throw new Error(`Please connect to Ethereum mainnet`)
 }
 
