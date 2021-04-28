@@ -12,6 +12,7 @@
     "build": "yarn workspace @opengsn/airdrop-app build",
     "deploy": "yarn workspace @opengsn/distributor deploy",
     "start": "yarn workspace @opengsn/airdrop-app start",
+    "copy-public-files": "yarn workspace @opengsn/airdrop-app copy-public-files",
     "test": "yarn workspace @opengsn/airdrop-app test"
   },
   "workspaces": {

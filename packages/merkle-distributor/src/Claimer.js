@@ -1,10 +1,10 @@
 import {Contract} from "ethers";
+import axios from 'axios'
 
 const MerkleDistributor = require("../build/contracts/MerkleDistributor.json")
 const ERC20 = require("../build/contracts/TestERC20.json")
-const proofs = require("../proofs/proofs")
 
-async function initContract(provider, truffleInstance, address) {
+function initContract(provider, truffleInstance, address) {
   return new Contract(address, truffleInstance.abi, provider)
 }
 
@@ -13,10 +13,10 @@ async function initContract(provider, truffleInstance, address) {
  */
 export class Claimer {
 
-  constructor(addr, provider, contract) {
+  constructor(addr, provider, contract, claim) {
     this.address = addr
     this.theContract = contract
-    this.claim = proofs.claims[addr]
+    this.claim = claim
   }
 
   async getState() {
@@ -54,16 +54,32 @@ export class Claimer {
   }
 }
 
-export async function initClaimer(claimerAddress, provider) {
-  const networkId = await provider.send('net_version')
-  const contractNetInfo = MerkleDistributor.networks[networkId]
-  if (contractNetInfo == null) {
-    throw new Error(`no instance of ${MerkleDistributor.contractName} for network ${networkId}. only for: ${Object.keys(MerkleDistributor.networks)}`)
+export async function initClaimer(claimerAddress, provider, baseUrl) {
+  const axiosInstance = axios.create({baseURL: baseUrl})
+  console.log('base=', baseUrl)
+  let claim
+  try {
+    const { data } = await axiosInstance.get(`proofs/proof-${claimerAddress.slice(2, 4).toLowerCase()}.json`)
+    claim = data.claims[claimerAddress]
+  } catch (e) {
+    //don't hide missing files (=broken installation).
+    // should report "request failed" (on missing file) or "cannot read property" (for broken configuration file)
+    throw e
   }
 
-  return new Claimer(claimerAddress, provider, await initContract(provider, MerkleDistributor, contractNetInfo.address))
+  const {data: addresses} = await axiosInstance.get('proofs/addresses.json')
+
+  const { distributor } = addresses
+  if (!distributor) {
+    throw new Error(`no instance of ${MerkleDistributor.contractName}`)
+  }
+
+  return new Claimer(claimerAddress, provider,
+    initContract(provider, MerkleDistributor, distributor),
+    claim)
 }
 
-export async function initToken(provider, address) {
-  return await initContract(provider, ERC20, address)
+export function initToken(provider, address) {
+  console.log('inittoken addr=', address)
+  return initContract(provider, ERC20, address)
 }

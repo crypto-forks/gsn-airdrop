@@ -28,13 +28,14 @@ export class ClaimAirdrop extends Component {
 
       this.account = (await provider.listAccounts())[0];
 
+      this.setState({state: 'init'})
       this.claimer = await initClaimer(this.account, provider)
-      this.token = await initToken(provider, await this.claimer.getToken())
+      this.token = initToken(provider, await this.claimer.getToken())
 
       await this.updateDisplay()
     } catch (e) {
       console.log(e)
-      this.setState({error: e.message})
+      this.setState({error: e.message, state:'failed'})
     }
   }
 
@@ -67,6 +68,7 @@ export class ClaimAirdrop extends Component {
 
   getStateName() {
     switch (this.state.state) {
+      case 'init': return 'Initializing'
       case "ok": return `Claim your ${this.state.amount/1e18} tokens`
       case "claiming": return `Claiming your ${this.state.amount/1e18} tokens`
       case 'claimed': {

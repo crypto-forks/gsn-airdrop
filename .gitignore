@@ -24,3 +24,4 @@ yarn-error.log*
 packages/subgraph/build/
 packages/subgraph/src/types/
 /.idea/
+/packages/react-app/public/proofs/
