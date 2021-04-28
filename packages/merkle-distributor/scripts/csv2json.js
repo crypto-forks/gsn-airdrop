@@ -1,12 +1,13 @@
 const fs = require('fs')
 const csvtojson = require('csvtojson')
 const BN = require('bn.js')
+const { toWei } = require('web3-utils')
 
 async function run () {
-  const sendersAirdroppedAmount = 400e18
-  const developersAirdroppedAmount = 3e22
-  const relayOperatorsAirdroppedAmount = 3e22
-  const personsCheckSum = 1525640e18.toLocaleString().replace(/,/g, '')
+  const sendersAirdroppedAmount = toWei('400', 'ether')
+  const developersAirdroppedAmount = toWei('30000', 'ether')
+  const relayOperatorsAirdroppedAmount = toWei('30000', 'ether')
+  const personsCheckSum = toWei('1525640', 'ether')
 
   const sendersFile = fs.readFileSync(__dirname + '/../airdrop/lists/senders', 'ascii')
   const developersFile = fs.readFileSync(__dirname + '/../airdrop/lists/developers', 'ascii')
@@ -26,13 +27,27 @@ async function run () {
   relayOperatorsArray.forEach(address => relayOperatorsJSON[address.toLowerCase()] = relayOperatorsAirdroppedAmount)
 
   const personsJSON = {}
+  const personsVestedAirdrop = []
   let personsSum = new BN(0)
   jsonObjFromCsv.forEach(obj => {
-    if (obj['field4'].includes('0x')) {
+    const recipientName = obj['field1']
+    const recipientAddress = obj['field4']
+    if (recipientAddress.includes('0x')) {
       const amount = obj['field2'].replace(/,/g, '').concat('0'.repeat(18))
-      console.log(`${obj['field1']} (${obj['field4']}) receives amount ${amount}`)
+      const vestingAmount = obj['field3'].replace(/,/g, '').concat('0'.repeat(18))
+      console.log(`${recipientName} (${recipientAddress}) receives amount ${amount}`)
+      personsVestedAirdrop.push({
+        recipientName,
+        recipientAddress,
+        vestingAmount
+      })
+      // NOTE: we now can have '0' as value for the airdrop - no need to create 0 entry proof
+      if (amount === '0') {
+        console.log(`zero amount - skipping!`)
+        return
+      }
       personsSum = personsSum.add(new BN(amount))
-      personsJSON[obj['field4'].toLowerCase()] = (new BN(amount)).toString(16)
+      personsJSON[recipientAddress.toLowerCase()] = `0x${(new BN(amount)).toString(16)}`
     }
   })
   if (personsSum.toString() !== personsCheckSum) {
@@ -46,6 +61,7 @@ async function run () {
   const mergedJSON = {  ...sendersJSON, ...developersJSON, ...relayOperatorsJSON, ...personsJSON }
 
   fs.writeFileSync(__dirname + '/../build/input.json', JSON.stringify(mergedJSON, null, '\n').replace(/\n\n/g, '\n'))
+  fs.writeFileSync(__dirname + '/../build/vested-airdrop.json', JSON.stringify(personsVestedAirdrop, null, '\n').replace(/\n\n/g, '\n'))
 
 }
 
