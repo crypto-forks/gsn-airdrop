@@ -23,18 +23,22 @@
     "prettier": "^2.0.5",
     "rimraf": "^3.0.0",
     "solc": "0.6.11",
+    "truffle-hdwallet-provider": "^1.0.17",
     "ts-node": "^8.5.4",
-    "typescript": "^3.7.3",
-    "truffle-hdwallet-provider": "^1.0.17"
+    "typescript": "^3.7.3"
   },
   "scripts": {
     "precompile": "rimraf ./build/",
     "compile": "waffle",
     "pretest": "yarn compile",
     "test": "mocha",
-
-    "deploy": "rm -rf build && yarn gen-proofs && truffle migrate --reset --compile-all --network ${NETWORK:=development}",
-    "gen-proofs": "mkdir -p proofs; ts-node scripts/generate-merkle-root.ts --input input.json |jq > proofs/proofs.json",
+    "csv2json": "mkdir -p build/ && node scripts/csv2json.js",
+    "deploy": "rm -rf build && yarn csv2json && yarn gen-proofs && truffle migrate --reset --compile-all --network ${NETWORK:=development}",
+    "gen-proofs": "mkdir -p proofs; ts-node scripts/generate-merkle-root.ts --input build/input.json |jq '.' > proofs/proofs.json",
     "prepublishOnly": "yarn test"
+  },
+  "dependencies": {
+    "bn.js": "^5.2.0",
+    "csvtojson": "^2.0.10"
   }
 }
