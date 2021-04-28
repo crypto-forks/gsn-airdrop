@@ -4,9 +4,9 @@ const BN = require('bn.js')
 const { toWei } = require('web3-utils')
 
 async function run () {
-  const sendersAirdroppedAmount = toWei('400', 'ether')
-  const developersAirdroppedAmount = toWei('30000', 'ether')
-  const relayOperatorsAirdroppedAmount = toWei('30000', 'ether')
+  const sendersAirdroppedAmount = `${(new BN(toWei('400', 'ether'))).toString(16)}`
+  const developersAirdroppedAmount = `${(new BN(toWei('30000', 'ether'))).toString(16)}`
+  const relayOperatorsAirdroppedAmount = `${(new BN(toWei('30000', 'ether'))).toString(16)}`
   const personsCheckSum = toWei('1525640', 'ether')
 
   const sendersFile = fs.readFileSync(__dirname + '/../airdrop/lists/senders', 'ascii')
@@ -47,7 +47,7 @@ async function run () {
         return
       }
       personsSum = personsSum.add(new BN(amount))
-      personsJSON[recipientAddress.toLowerCase()] = `0x${(new BN(amount)).toString(16)}`
+      personsJSON[recipientAddress.toLowerCase()] = `${(new BN(amount)).toString(16)}`
     }
   })
   if (personsSum.toString() !== personsCheckSum) {
