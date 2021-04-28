@@ -8,6 +8,8 @@ import logo from "./gsn-green-vector.svg";
 import {ClaimAirdrop} from "./components/ClaimAirdrop";
 
 async function isMetamaskConnected() {
+  if ( !window.ethereum)
+    return false
   const accounts = await new Web3Provider(window.ethereum).listAccounts().catch(e=>e.message)
   return accounts && accounts.length
 }
@@ -60,18 +62,21 @@ function App() {
   // const [provider, loadWeb3Modal, logoutOfWeb3Modal] = useWeb3Modal();
 
   const rpcProvider = window.ethereum
-  const provider = new Web3Provider(rpcProvider)
-  if ( rpcProvider.isMetaMask ) {
-    rpcProvider.on('chainChanged', (chainId)=>{
-      console.log('chainChanged:', chainId)
-      // if (chianId != net.chainId) {
-      window.location.reload()
-      // }
-    })
-    rpcProvider.on('accountsChanged', (accs) => {
-      console.log('accountChanged', accs);
-      window.location.reload()
-    })
+  let provider
+  if ( rpcProvider) {
+    provider = new Web3Provider(rpcProvider)
+    if (rpcProvider.isMetaMask) {
+      rpcProvider.on('chainChanged', (chainId) => {
+        console.log('chainChanged:', chainId)
+        // if (chianId != net.chainId) {
+        window.location.reload()
+        // }
+      })
+      rpcProvider.on('accountsChanged', (accs) => {
+        console.log('accountChanged', accs);
+        window.location.reload()
+      })
+    }
   }
   return (
     <div>

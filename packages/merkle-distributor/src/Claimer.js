@@ -71,8 +71,9 @@ export async function initClaimer(claimerAddress, provider, baseUrl) {
 
   const { distributor } = addresses
   if (!distributor) {
-    throw new Error(`no instance of ${MerkleDistributor.contractName}`)
-  }
+    console.error(`no instance of ${MerkleDistributor.contractName} for network ${networkId}. only for: ${Object.keys(MerkleDistributor.networks)}`)
+    throw new Error(`Please connect to Ethereum mainnet`)
+}
 
   return new Claimer(claimerAddress, provider,
     initContract(provider, MerkleDistributor, distributor),

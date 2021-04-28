@@ -1,7 +1,7 @@
 import {Button} from "./index";
 
 import {initClaimer, initToken} from '@opengsn/distributor'
-
+import numeral from 'numeral'
 import React, {Component} from "react";
 
 const toString = x => (x || 'null').toString()
@@ -21,12 +21,20 @@ export class ClaimAirdrop extends Component {
   async componentDidMount() {
     const provider = this.provider
     if (!provider) {
-      this.setState({error: "no provider"})
+      this.setState({error: "Metamask provider not detected"})
       return
     }
     try {
 
+      if ( !provider ) {
+        this.setState({error: 'Metamask not detected'})
+        return
+      }
       this.account = (await provider.listAccounts())[0];
+      if ( !this.account ) {
+        this.setState({ error: 'Metamask account not connected'})
+        return
+      }
 
       this.setState({state: 'init'})
       this.claimer = await initClaimer(this.account, provider)
@@ -66,11 +74,15 @@ export class ClaimAirdrop extends Component {
     }
   }
 
+  formatAmount(amount) {
+
+    return numeral(amount/1e18).format('0,0')
+  }
   getStateName() {
     switch (this.state.state) {
       case 'init': return 'Initializing'
-      case "ok": return `Claim your ${this.state.amount/1e18} tokens`
-      case "claiming": return `Claiming your ${this.state.amount/1e18} tokens`
+      case "ok": return `Claim your ${this.formatAmount(this.state.amount)} tokens`
+      case "claiming": return `Claiming your ${this.formatAmount(this.state.amount)} tokens`
       case 'claimed': {
         if ( this.justClaimed )
           return "Claimed successfully"
@@ -78,7 +90,7 @@ export class ClaimAirdrop extends Component {
       }
       case 'no-claim': return 'No tokens for your account'
       default:
-        return `errr: state ${this.state.state}`
+        return `Unable to claim tokens`
     }
   }
   render() {
