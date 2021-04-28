@@ -7,7 +7,7 @@ async function run () {
   const sendersAirdroppedAmount = new BN(toWei('400', 'ether'))
   const developersAirdroppedAmount = new BN(toWei('30000', 'ether'))
   const relayOperatorsAirdroppedAmount = new BN(toWei('30000', 'ether'))
-  const personsCheckSum = toWei('1525640', 'ether')
+  const personsCheckSum = toWei('1495640', 'ether')
 
   const sendersFile = fs.readFileSync(__dirname + '/../airdrop/lists/senders', 'ascii')
   const developersFile = fs.readFileSync(__dirname + '/../airdrop/lists/developers', 'ascii')
@@ -42,7 +42,7 @@ async function run () {
         vestingAmount
       })
       // NOTE: we now can have '0' as value for the airdrop - no need to create 0 entry proof
-      if (amount === '0') {
+      if (amount == 0) {
         console.log(`zero amount - skipping!`)
         return
       }

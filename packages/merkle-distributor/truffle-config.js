@@ -19,6 +19,9 @@ module.exports = {
       host: "127.0.0.1",     // Localhost (default: none)
       port: 8545,            // Standard Ethereum port (default: none)
       network_id: "*",       // Any network (default: none)
+      gasPrice: process.env.GAS_PRICE_GWEI ? (process.env.GAS_PRICE_GWEI*1e9).toString() : null,
+      gas: process.env.GAS_LIMIT ? parseInt(process.env.GAS_LIMIT) : null,
+      skipDryRun: true
     },
   },
 
